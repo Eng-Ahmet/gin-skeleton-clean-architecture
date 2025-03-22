@@ -22,7 +22,7 @@ jobs:
           go-version: 1.24.1
 
       - name: Install dependencies
-        run: go mod tidy # Now, it should work with Go >= 1.11
+        run: go mod tidy
 
       - name: Build
         run: go build -v ./...
