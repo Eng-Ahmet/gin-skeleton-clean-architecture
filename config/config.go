@@ -1,8 +1,23 @@
-// config/config.go
 package config
 
-func LoadConfig() {
+import (
+	"log"
+	"os"
 
-	LoadEnv()
-	ConnectToDatabase()
+	"github.com/joho/godotenv"
+)
+
+func LoadConfig() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("No .env file found")
+	}
+}
+
+func GetEnv(key string, defaultValue string) string {
+	value, exists := os.LookupEnv(key)
+	if !exists {
+		return defaultValue
+	}
+	return value
 }

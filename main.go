@@ -1,28 +1,35 @@
 package main
 
 import (
-	"hwai-api/cmd/routes"
-	"hwai-api/config"
+	"fiper-skeleton-clean-architecture/router"
+	"fiper-skeleton-clean-architecture/pkg/logger"
+	"fiper-skeleton-clean-architecture/websocket"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-// main function
 func main() {
+	// تهيئة السجل
+	logger.InitLogger("log/info.log", "log/errors.log")
 
-	// load the environment variables
-	config.LoadEnv()
+	// إنشاء تطبيق Fiber بدون تفعيل Prefork
+	app := fiber.New(fiber.Config{
+		//Prefork: true, // إلغاء Prefork
+	})
 
-	// read the port from the environment variables
-	port := config.GetEnv("PORT", "8001")
+	// إضافة Middleware CORS
+	app.Use(cors.New())
 
-	println("")
-	println("Server is running on port: " + port + " ...")
-	println("API works at: http://localhost:" + port)
-	println("Press CTRL + C to stop the server.")
-	println("")
+	// إعداد مسارات API
+	router.InitializeRoutes(app)
 
-	// load the routes
-	r := routes.SetupRouter()
+	// إعداد WebSocket
+	websocket.SetupWebSocket(app)
 
-	// run the server
-	r.Run(":" + port)
+	// بدء السيرفر على المنفذ 8080
+	if err := app.Listen(":8080"); err != nil {
+		log.Fatal("Error starting server: ", err)
+	}
 }

@@ -1,8 +1,8 @@
 // config/env.go
-package config
+package utils
 
 import (
-	"hwai-api/pkg/logger"
+	"fiper-skeleton-clean-architecture/pkg/logger"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -13,7 +13,7 @@ import (
 func LoadEnv() {
 	err := godotenv.Load()
 	if err != nil {
-		logger.GetErrorLogger().Println("Failed to load .env file")
+		logger.Error("Failed to load .env file: " + err.Error())
 	}
 }
 
@@ -29,7 +29,7 @@ func GetEnv(key string, defaultValue string) string {
 func SetEnv(key string, value string) error {
 	err := os.Setenv(key, value)
 	if err != nil {
-		logger.GetErrorLogger().Println("Failed to set environment variable:", key)
+		logger.Error("Failed to set environment variable:" + key + " : " + err.Error())
 	}
 	return err
 }

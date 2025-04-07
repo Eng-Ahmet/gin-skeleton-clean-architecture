@@ -3,46 +3,43 @@ package logger
 import (
 	"log"
 	"os"
-	"sync"
 )
 
 var (
-	once          sync.Once
-	infoLogger    *log.Logger
-	warningLogger *log.Logger
-	errorLogger   *log.Logger
+	infoLogger  *log.Logger
+	errorLogger *log.Logger
 )
 
-// initializeLoggers  initializes the loggers
-// It is called only once when the first logger is requested
-func initializeLoggers() {
-	once.Do(func() {
-		file, err := os.OpenFile("app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+func InitLogger(infoLogPath, errorLogPath string) {
+	var infoLogOutput, errorLogOutput *os.File
+	var err error
+
+	if infoLogPath != "" {
+		infoLogOutput, err = os.OpenFile(infoLogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
-			log.Println("Failed to open log file, using default stderr:", err)
-			file = os.Stderr // log to stderr if file is not available
+			log.Fatalf("Failed to open info log file: %v", err)
 		}
+	} else {
+		infoLogOutput = os.Stdout
+	}
 
-		infoLogger = log.New(file, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
-		warningLogger = log.New(file, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
-		errorLogger = log.New(file, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
-	})
+	if errorLogPath != "" {
+		errorLogOutput, err = os.OpenFile(errorLogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Fatalf("Failed to open error log file: %v", err)
+		}
+	} else {
+		errorLogOutput = os.Stderr
+	}
+
+	infoLogger = log.New(infoLogOutput, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
+	errorLogger = log.New(errorLogOutput, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
 }
 
-// GetInfoLogger  returns the info logger
-func GetInfoLogger() *log.Logger {
-	initializeLoggers()
-	return infoLogger
+func Info(message string) {
+	infoLogger.Println(message)
 }
 
-// GetWarningLogger  returns the warning logger
-func GetWarningLogger() *log.Logger {
-	initializeLoggers()
-	return warningLogger
-}
-
-// GetErrorLogger  returns the error logger
-func GetErrorLogger() *log.Logger {
-	initializeLoggers()
-	return errorLogger
+func Error(message string) {
+	errorLogger.Println(message)
 }
